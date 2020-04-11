@@ -1,6 +1,25 @@
 {
+  "name": "speed-dating-telegram",
+  "description": "Telegram Bot with simple, 1-click Speed Dating functionality.",
+  "version": "0.1.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BESTLviv/speed-dating-telegram.git"
+  },
+  "author": "Dymytrii Ishchuk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BESTLviv/speed-dating-telegram/issues"
+  },
+  "homepage": "https://github.com/BESTLviv/speed-dating-telegram#readme",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
-    "package.json": "^2.0.1",
+    "nodemon": "^2.0.3",
     "telegraf": "3.37.0"
   }
 }
