@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "nodemon": "^2.0.3",
-    "telegraf": "3.37.0"
+    "telegraf": "3.37.0",
+    "telegraf-inline-menu": "^4.0.0"
   }
 }

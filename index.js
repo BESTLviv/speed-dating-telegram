@@ -1,9 +1,24 @@
 const config = require('./config.json')
 const Telegraf = require('telegraf')
+const TelegrafInlineMenu = require('telegraf-inline-menu')
 const bot = new Telegraf(config.bot_token)
-bot.start((ctx) => ctx.reply('Welcome!'))
-bot.dating( (ctx) => ctx.reply("Привіт! Розпочнемо раунд speed-dating'у? \nРеєстрація триватиме 2 хвилини (120 сек)"))
-bot.help((ctx) => ctx.reply('Send me a sticker'))
-bot.on('sticker', (ctx) => ctx.reply('👍'))
-bot.hears('hi', (ctx) => ctx.reply('Hey there'))
-bot.launch()
+bot.command(
+
+var round_participants = {}
+
+const menu = new TelegrafInlineMenu(ctx => "Привіт! Розпочнемо раунд speed-dating'у? \nРеєстрація триватиме 2 хвилини (120 сек)")
+menu.setCommand('start')
+
+menu.simpleButton('Прийняти участь', 'a', {
+  doFunc: function(ctx){ ctx.reply(`${ctx.from.first_name} долучається до раунду!`) }
+})
+
+function start_round(argument) {
+	// body...
+}
+
+
+
+bot.use(menu.init())
+
+bot.startPolling()
