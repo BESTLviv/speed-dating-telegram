@@ -5,6 +5,7 @@ const Telegram = require('telegraf/telegram')
 const config = require('./config.json')
 const bot = new Telegraf(config.bot_token)
 const telegram = new Telegram(config.bot_token)
+const admin = config.adminID
 
 // Functions
 function checkAdmin() {
@@ -39,18 +40,27 @@ bot.command('speed_dating', (ctx) => {
 bot.command('stop_dating', (ctx) => {
 	ctx.reply("Раунд speed-dating'у завершений!")
 	game_status = false
+	reg_status = false
+	participants = []
 })
 
 bot.command('go', (ctx) => {
 	if (game_status && reg_status) {
-	  	telegram.sendMessage(ctx.from.id, 'Ти зареєструвався(-лась) на раунд speed-dating!').then(
-	  		function(success) {
-	  			ctx.reply(`У нас новий учасник!`)
-	  		},
-	  		function(error) {
-	  			ctx.reply(`@${ctx.from.username}: Активуй мене через повідомлення і спробуй ще раз! Реєстрація не вдалась!`)
-			}
-		)
+		if (!(participants.includes(ctx.from.id)) ) {
+		  	telegram.sendMessage(ctx.from.id, 'Ти зареєструвався(-лась) на раунд speed-dating!').then(
+		  		function(success) {
+		  			ctx.reply(`У нас новий учасник!`)
+		  			participants[participants.length] = ctx.from.id
+		  			console.log(participants)
+		  		},
+		  		function(error) {
+		  			ctx.reply(`@${ctx.from.username}: Активуй мене через повідомлення і спробуй ще раз! Реєстрація не вдалась!`)
+				}
+			)
+		}
+		else{
+			telegram.sendMessage(ctx.from.id, 'Ти вже зареєстрований(-а) на цей раунд speed-dating!')
+		}  	
 	} else {
 		ctx.reply(`@${ctx.from.username}: не квапся, козаче - реєстрація на speed dating ще не відкрита!`)
 	}
