@@ -77,7 +77,7 @@ bot.command('speed_dating', (ctx) => {
 				pairs_done = []
 			}
 		}
-	}, 10000)
+	}, 25000)
 
 
 })
