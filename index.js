@@ -6,6 +6,7 @@ const config = require('./config.json')
 const bot = new Telegraf(config.bot_token)
 const telegram = new Telegram(config.bot_token)
 const admin = config.adminID
+const jitsiUrl = 'https://meet.jit.si/'
 
 // Functions
 function checkAdmin() {
@@ -17,7 +18,14 @@ function generate_pairs(members = []) {
 }
 
 function send_jitsi_room (user1='', user2='') {
-
+    if(!user1 || !user2){
+        return
+    }
+    const personalRoomUrl = jitsiUrl + user1 + user2
+    const message = "Твоє персональне посилання на мітинг " + personalRoomUrl
+    Promise.all([telegram.sendMessage(user1, message), telegram.sendMessage(user2, message)])
+        .then(res=>console.log(res))
+        .catch(e=>console.log(e))
 }
 
 // Bot commands
