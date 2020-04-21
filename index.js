@@ -13,7 +13,7 @@ function checkAdmin() {
 }
 
 function generate_pairs(members = []) {
-
+	console.log('generated_pairs')
 }
 
 function send_jitsi_room (user1='', user2='') {
@@ -27,14 +27,28 @@ bot.command('start', (ctx) => {
 
 var game_status = false
 var reg_status = false
+var extend_reg = false
 var participants = []
+var pairs_done = {}
 
 bot.command('speed_dating', (ctx) => {
 	ctx.reply("Розпочнемо раунд speed-dating'у? \nРеєстрація триватиме 2 хвилини (120 сек)")
-	ctx.reply("Обов'язково запусти мене перед реєстрацією!")
-	ctx.reply("Щоб зареєструватись, напиши /go")
+	ctx.reply("Обов'язково запусти мене перед реєстрацією!\nЩоб зареєструватись, напиши /go")
 	game_status = true
 	reg_status = true
+	setTimeout(()=>{
+		
+		if ((participants.length-1) % 2 == 0) {
+			ctx.reply("Реєстрація завершена! Генеруємо пари...")
+			reg_status = false
+			generate_pairs(participants)
+		} else {
+			ctx.reply("Реєстрація завершується... останній слот!")
+			extend_reg = true
+		}
+	}, 10000)
+
+
 })
 
 bot.command('stop_dating', (ctx) => {
@@ -42,6 +56,7 @@ bot.command('stop_dating', (ctx) => {
 	game_status = false
 	reg_status = false
 	participants = []
+	pairs_done = []
 })
 
 bot.command('go', (ctx) => {
@@ -50,8 +65,14 @@ bot.command('go', (ctx) => {
 		  	telegram.sendMessage(ctx.from.id, 'Ти зареєструвався(-лась) на раунд speed-dating!').then(
 		  		function(success) {
 		  			ctx.reply(`У нас новий учасник!`)
+		  			participants = [48370546, 48370545, 48370544]
 		  			participants[participants.length] = ctx.from.id
+		  			
 		  			console.log(participants)
+		  			if (extend_reg) {
+		  				extend_reg = false
+		  				generate_pairs(participants)
+		  			}
 		  		},
 		  		function(error) {
 		  			ctx.reply(`@${ctx.from.username}: Активуй мене через повідомлення і спробуй ще раз! Реєстрація не вдалась!`)
@@ -62,7 +83,7 @@ bot.command('go', (ctx) => {
 			telegram.sendMessage(ctx.from.id, 'Ти вже зареєстрований(-а) на цей раунд speed-dating!')
 		}  	
 	} else {
-		ctx.reply(`@${ctx.from.username}: не квапся, козаче - реєстрація на speed dating ще не відкрита!`)
+		ctx.reply(`@${ctx.from.username}: - реєстрація на speed dating наразі не активна`)
 	}
 })
 
