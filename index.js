@@ -14,24 +14,56 @@ var reg_status = false
 var extend_reg = false
 var participants = []
 var pairs_done = []
-
+let old_pairs = {}
 // Functions
 function checkAdmin() {
 
 }
 
 function generate_pairs(members = []) {
-	while (members.length>0) {
-		console.log(members)
-		let user1 = members[0]
-		members.splice(0, 1);
-		let rand_i = Math.floor(Math.random() * members.length)
-		let user2 = members[rand_i]
-		members.splice(rand_i, 1)
-		pairs_done.push([user1, user2])
-		send_jitsi_room(user1, user2)
-	}
-	
+    if(members%2!==0){
+        return
+    }
+    const sortedMembers = members.sort(
+        (a, b) => {
+            let a1 = old_pairs[a]?.length || 0
+            let b1 = old_pairs[b]?.length || 0
+            return a1 - b1
+        })
+
+    let meetBeforeUsers = []
+
+    //for pairs that didn`t meet
+    while (sortedMembers.length > 0) {
+	    let user1 = sortedMembers.pop()
+        let filteredMembers = sortedMembers.filter(user => !old_pairs[user1] || !old_pairs[user1].includes(user))
+        if (filteredMembers.length!==0) {
+            let rand_i = Math.floor(Math.random() * filteredMembers.length)
+            let itemToDelete = sortedMembers.findIndex(it=>it===filteredMembers[rand_i])
+            let user2 = sortedMembers.splice(itemToDelete, 1)[0]
+            if (!old_pairs[user1]) {
+                old_pairs[user1] = []
+            }
+            if (!old_pairs[user2]) {
+                old_pairs[user2] = []
+            }
+            old_pairs[user1].push(user2)
+            old_pairs[user2].push(user1)
+            send_jitsi_room(user1, user2)
+        } else {
+            meetBeforeUsers.push(user1)
+        }
+    }
+
+    //for pairs that already meet
+    while (meetBeforeUsers.length > 0) {
+        let user1 = meetBeforeUsers.pop()
+        let rand_i = Math.floor(Math.random() * meetBeforeUsers.length)
+        let user2 = meetBeforeUsers.splice(rand_i, 1)[0]
+        old_pairs[user1].push(user2)
+        old_pairs[user2].push(user1)
+        send_jitsi_room(user1, user2)
+    }
 }
 
 function send_jitsi_room (user1='', user2='') {
