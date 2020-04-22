@@ -94,7 +94,7 @@ function send_jitsi_room (user1='', user2='') {
 				rnd_ovr_msg = 'Раунд завершився! Повертайся у конфу :)'
 				telegram.sendMessage(user1, rnd_ovr_msg)
 				telegram.sendMessage(user2, rnd_ovr_msg)
-			}, 30000)
+			}, 600000)
 		})
         .catch(e=>console.log(e))
 }
@@ -129,7 +129,7 @@ bot.command('speed_dating', (ctx) => {
 						old_pairs = {}
 					}
 				}
-			}, 30000)
+			}, 120000)
 		} else {
 			ctx.reply("Упс... Лише адмін групи може стартувати раунд!")
 		}
