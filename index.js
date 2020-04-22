@@ -24,10 +24,12 @@ function check_chat_admin(userid, chatid) {
 }
 
 function generate_pairs(ctx, members = []) {
-    if(members%2!==0||members.length===0){
-        return
+	ctx.reply("Генеруємо пари...")
+    if(members.length%2!==0||members.length===0){
+		return
     }
-
+	const copy = [...members]
+	
     const sortedMembers = members.sort(
         (a, b) => {
             let a1 = old_pairs[a] && old_pairs[a].filter(value => members.includes(value)).length || 0
@@ -36,9 +38,9 @@ function generate_pairs(ctx, members = []) {
         })
 
     let meetBeforeUsers = []
-
     //for pairs that didn`t meet
     while (sortedMembers.length > 0) {
+		console.log(sortedMembers)
 	    let user1 = sortedMembers.pop()
         let filteredMembers = sortedMembers.filter(user => !old_pairs[user1] || !old_pairs[user1].includes(user))
         if (filteredMembers.length!==0) {
@@ -58,8 +60,9 @@ function generate_pairs(ctx, members = []) {
             meetBeforeUsers.push(user1)
         }
     }
-
-    if(members.length===sortedMembers.length){
+console.log(copy)
+console.log(meetBeforeUsers)
+    if (copy.length === meetBeforeUsers.length) {
         ctx.reply(`Неможливо згенерувати нові унікальні пари =(`)
         return;
     }
@@ -81,7 +84,7 @@ function generate_pairs(ctx, members = []) {
 function send_jitsi_room (user1='', user2='') {
     if(!user1 || !user2){
         return
-    }
+	}
     const personalRoomUrl = jitsiUrl + user1 + user2
     const message = "Твоє персональне посилання на мітинг " + personalRoomUrl
     Promise.all([telegram.sendMessage(user1, message), telegram.sendMessage(user2, message)])
@@ -100,14 +103,13 @@ bot.command('speed_dating', (ctx) => {
 	.then(res => {
 		if (res) {
 			ctx.reply("Розпочнемо раунд speed-dating'у? \nРеєстрація триватиме 2 хвилини (120 сек)")
-			ctx.reply("Обов'язково Напиши мені в ПП перед реєстрацією!\nЩоб зареєструватись, напиши у цій конфі '/go' ")
+			ctx.reply("Обов'язково запусти мене в ПП перед реєстрацією!\nЩоб зареєструватись, напиши у цій конфі '/go' ")
 			game_status = true
 			reg_status = true
 			setTimeout(() => {
 
 			if (participants.length % 2 == 0) {
-				ctx.reply("Реєстрація завершена! Генеруємо пари...")
-				console.log(participants.length)
+				ctx.reply("Реєстрація завершена!")
 				reg_status = false
 				generate_pairs(ctx, participants)
 
@@ -123,7 +125,7 @@ bot.command('speed_dating', (ctx) => {
 						old_pairs = {}
 					}
 				}
-			}, 25000)
+			}, 15000)
 		} else {
 			ctx.reply("Упс... Лише адмін групи може стартувати раунд!")
 		}
@@ -136,12 +138,9 @@ bot.command('stop_dating', (ctx) => {
 	.then(res => {
 		if (res) {
 			ctx.reply("Раунд speed-dating'у завершений!")
-			console.log('PAIRS')
-			console.log(old_pairs)
 			game_status = false
 			reg_status = false
 			participants = []
-			old_pairs = {}
 		}
 		else{
 			ctx.reply("Упс... Лише адмін групи може зупиняти раунд!")
@@ -149,18 +148,31 @@ bot.command('stop_dating', (ctx) => {
 	})
 })
 
+bot.command('reset_old_pairs', (ctx) => {
+	check_chat_admin(ctx.from.id, ctx.chat.id)
+	.then(res => {
+		if (res) {
+			old_pairs = {}
+			ctx.reply("Історія пар очищена!")
+		}
+		else {
+			ctx.reply("Упс... Лише адмін групи може це робити!")
+		}
+	})
+})
+
 bot.command('go', (ctx) => {
 	if (game_status && reg_status) {
 		if (!(participants.includes(ctx.from.id)) ) {
-			console.log(ctx.from)
 		  	telegram.sendMessage(ctx.from.id, 'Ти зареєструвався(-лась) на раунд speed-dating!').then(
 		  		function(success) {
 		  			ctx.reply(`У нас новий учасник!`)
 		  			// participants = [48370546, 48370545, 48370544]
 		  			participants[participants.length] = ctx.from.id
-		  			
+		  			console.log('OUR PAX:')
 		  			console.log(participants)
 		  			if (extend_reg) {
+						ctx.reply(`Стартуємо!`)
 		  				extend_reg = false
 		  				generate_pairs(ctx, participants)
 		  			}
