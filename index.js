@@ -32,10 +32,11 @@ function check_chat_admin(userid, chatid) {
 	
 }
 
-function generate_pairs(members = []) {
-    if(members%2!==0){
+function generate_pairs(ctx, members = []) {
+    if(members%2!==0||members.length===0){
         return
     }
+
     const sortedMembers = members.sort(
         (a, b) => {
             let a1 = old_pairs[a] && old_pairs[a].filter(value => members.includes(value)).length || 0
@@ -67,6 +68,10 @@ function generate_pairs(members = []) {
         }
     }
 
+    if(members.length===sortedMembers.length){
+        ctx.reply(`Неможливо згенерувати нові унікальні пари =(`)
+        return;
+    }
     //for pairs that already meet
     while (meetBeforeUsers.length > 0) {
         let user1 = meetBeforeUsers.pop()
@@ -166,7 +171,7 @@ bot.command('go', (ctx) => {
 		  			console.log(participants)
 		  			if (extend_reg) {
 		  				extend_reg = false
-		  				generate_pairs(participants)
+		  				generate_pairs(ctx, participants)
 		  			}
 		  		},
 		  		function(error) {
