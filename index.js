@@ -21,13 +21,13 @@ function checkAdmin() {
 }
 
 function generate_pairs(members = []) {
-    if(members%2!==0){
+    if(members%2===0){
         return
     }
     const sortedMembers = members.sort(
         (a, b) => {
-            let a1 = old_pairs[a]?.length || 0
-            let b1 = old_pairs[b]?.length || 0
+            let a1 = old_pairs[a]?.filter(value => members.includes(value)).length || 0
+            let b1 = old_pairs[b]?.filter(value => members.includes(value)).length || 0
             return a1 - b1
         })
 
@@ -60,8 +60,12 @@ function generate_pairs(members = []) {
         let user1 = meetBeforeUsers.pop()
         let rand_i = Math.floor(Math.random() * meetBeforeUsers.length)
         let user2 = meetBeforeUsers.splice(rand_i, 1)[0]
-        old_pairs[user1].push(user2)
-        old_pairs[user2].push(user1)
+        if(!old_pairs[user1].includes(user2)){
+            old_pairs[user1].push(user2)
+        }
+        if(!old_pairs[user2].includes(user1)){
+            old_pairs[user2].push(user1)
+        }
         send_jitsi_room(user1, user2)
     }
 }
