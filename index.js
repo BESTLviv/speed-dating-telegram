@@ -88,11 +88,16 @@ function send_jitsi_room (user1='', user2='') {
     const personalRoomUrl = jitsiUrl + user1 + user2
     const message = "Твоє персональне посилання на мітинг " + personalRoomUrl
     Promise.all([telegram.sendMessage(user1, message), telegram.sendMessage(user2, message)])
-        .then(res=>console.log(res))
+        .then(res => {
+			console.log(res)
+			setTimeout(() => {
+				rnd_ovr_msg = 'Раунд завершився! Повертайся у конфу :)'
+				telegram.sendMessage(user1, rnd_ovr_msg)
+				telegram.sendMessage(user2, rnd_ovr_msg)
+			}, 30000)
+		})
         .catch(e=>console.log(e))
 }
-// send_jitsi_room(48370547,365306009)
-// generate_pairs([48370547, 48370546, 365306009, 48370544])
 // Bot commands
 bot.command('start', (ctx) => {
     ctx.reply("Привіт! Я - бот для Speed Dating'у.\nТи активував(-ла) мене, тож тепер можеш брати участь у раундах")
@@ -108,11 +113,10 @@ bot.command('speed_dating', (ctx) => {
 			reg_status = true
 			setTimeout(() => {
 
-			if (participants.length % 2 == 0) {
-				ctx.reply("Реєстрація завершена!")
-				reg_status = false
-				generate_pairs(ctx, participants)
-
+				if (participants.length % 2 == 0) {
+					ctx.reply("Реєстрація завершена!")
+					reg_status = false
+					generate_pairs(ctx, participants)
 				} else {
 					if (participants.length >= 3) {
 						ctx.reply("Реєстрація завершується... останній слот!")
@@ -125,7 +129,7 @@ bot.command('speed_dating', (ctx) => {
 						old_pairs = {}
 					}
 				}
-			}, 15000)
+			}, 30000)
 		} else {
 			ctx.reply("Упс... Лише адмін групи може стартувати раунд!")
 		}
