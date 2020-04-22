@@ -5,7 +5,6 @@ const Telegram = require('telegraf/telegram')
 const config = require('./config.json')
 const bot = new Telegraf(config.bot_token)
 const telegram = new Telegram(config.bot_token)
-const admin = config.adminID
 const jitsiUrl = 'https://meet.jit.si/'
 
 // Process Variables
@@ -16,8 +15,22 @@ var participants = []
 var pairs_done = []
 let old_pairs = {}
 // Functions
-function checkAdmin() {
-
+function check_chat_admin(userid, chatid) {
+	telegram.getChatAdministrators(chatid)
+	.then((admin_arr) => {
+		console.log(admin_arr.length)
+		admin_arr.forEach(admin => {
+			console.log('checking')
+			console.log(admin)
+			if (parseInt(admin.user.id) = parseInt(userid)) {
+				return true
+			}
+		})
+	} )
+	.catch ( ()=>{
+		return false
+	})
+	
 }
 
 function generate_pairs(members = []) {
@@ -84,38 +97,44 @@ function send_jitsi_room (user1='', user2='') {
 // generate_pairs([48370547, 48370546, 365306009, 48370544])
 // Bot commands
 bot.command('start', (ctx) => {
-	ctx.reply("Привіт! Я - бот для Speed Dating'у.\nТи активував(-ла) мене, тож тепер можеш брати участь у раундах")
+	if (check_chat_admin(ctx.from.id, ctx.chat.id)) {
+		ctx.reply("Привіт! Я - бот для Speed Dating'у.\nТи активував(-ла) мене, тож тепер можеш брати участь у раундах")
+	}
+	else {
+		ctx.reply('not passed')
+	}
 })
 
 bot.command('speed_dating', (ctx) => {
-	ctx.reply("Розпочнемо раунд speed-dating'у? \nРеєстрація триватиме 2 хвилини (120 сек)")
-	ctx.reply("Обов'язково запусти мене перед реєстрацією!\nЩоб зареєструватись, напиши /go")
-	game_status = true
-	reg_status = true
-	setTimeout(()=>{
-		
-		if (participants.length % 2 == 0) {
-			ctx.reply("Реєстрація завершена! Генеруємо пари...")
-			console.log(participants.length)
-			reg_status = false
-			generate_pairs(participants)
+	if (check_chat_admin(ctx.from.id, ctx.chat.id)) {
+		ctx.reply("Розпочнемо раунд speed-dating'у? \nРеєстрація триватиме 2 хвилини (120 сек)")
+		ctx.reply("Обов'язково Напиши мені в ПП перед реєстрацією!\nЩоб зареєструватись, напиши у цій конфі '/go' ")
+		game_status = true
+		reg_status = true
+		setTimeout(() => {
 
-		} else {
-			if(participants.length>=3) {
-				ctx.reply("Реєстрація завершується... останній слот!")
-				extend_reg = true
-			}
-			else {
-				ctx.reply("Раунд не розпочато - Недостатньо учасників :(")
-				game_status = false
+			if (participants.length % 2 == 0) {
+				ctx.reply("Реєстрація завершена! Генеруємо пари...")
+				console.log(participants.length)
 				reg_status = false
-				participants = []
-				pairs_done = []
+				generate_pairs(participants)
+
+			} else {
+				if (participants.length >= 3) {
+					ctx.reply("Реєстрація завершується... останній слот!")
+					extend_reg = true
+				} else {
+					ctx.reply("Раунд не розпочато - Недостатньо учасників :(")
+					game_status = false
+					reg_status = false
+					participants = []
+					pairs_done = []
+				}
 			}
-		}
-	}, 25000)
-
-
+		}, 25000)
+	} else {
+		ctx.reply("Упс... Лише адмін групи може стартувати раунд!")
+	}
 })
 
 bot.command('stop_dating', (ctx) => {
@@ -158,18 +177,6 @@ bot.command('go', (ctx) => {
 })
 
 // Other
-
-
-const menu = new TelegrafInlineMenu(ctx => "Test")
-menu.simpleButton('Test menu', 'a', {
-  doFunc: function(ctx){
-  	console.log(ctx.from)
-  }
-})
-
-menu.setCommand('test')
-
-bot.use(menu.init())
 
 // Launch
 bot.startPolling()
