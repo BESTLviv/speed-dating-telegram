@@ -12,7 +12,6 @@ var game_status = false
 var reg_status = false
 var extend_reg = false
 var participants = []
-var pairs_done = []
 let old_pairs = {}
 // Functions
 function check_chat_admin(userid, chatid) {
@@ -97,54 +96,61 @@ function send_jitsi_room (user1='', user2='') {
 // generate_pairs([48370547, 48370546, 365306009, 48370544])
 // Bot commands
 bot.command('start', (ctx) => {
-	if (check_chat_admin(ctx.from.id, ctx.chat.id)) {
-		ctx.reply("Привіт! Я - бот для Speed Dating'у.\nТи активував(-ла) мене, тож тепер можеш брати участь у раундах")
-	}
-	else {
-		ctx.reply('not passed')
-	}
+	ctx.reply("Привіт! Я - бот для Speed Dating'у.\nТи активував(-ла) мене, тож тепер можеш брати участь у раундах")
 })
 
 bot.command('speed_dating', (ctx) => {
-	if (check_chat_admin(ctx.from.id, ctx.chat.id)) {
-		ctx.reply("Розпочнемо раунд speed-dating'у? \nРеєстрація триватиме 2 хвилини (120 сек)")
-		ctx.reply("Обов'язково Напиши мені в ПП перед реєстрацією!\nЩоб зареєструватись, напиши у цій конфі '/go' ")
-		game_status = true
-		reg_status = true
-		setTimeout(() => {
+	check_chat_admin(ctx.from.id, ctx.chat.id)
+	.then(res => {
+		if (res) {
+			ctx.reply("Розпочнемо раунд speed-dating'у? \nРеєстрація триватиме 2 хвилини (120 сек)")
+			ctx.reply("Обов'язково Напиши мені в ПП перед реєстрацією!\nЩоб зареєструватись, напиши у цій конфі '/go' ")
+			game_status = true
+			reg_status = true
+			setTimeout(() => {
 
-			if (participants.length % 2 == 0) {
-				ctx.reply("Реєстрація завершена! Генеруємо пари...")
-				console.log(participants.length)
-				reg_status = false
-				generate_pairs(participants)
-
-			} else {
-				if (participants.length >= 3) {
-					ctx.reply("Реєстрація завершується... останній слот!")
-					extend_reg = true
-				} else {
-					ctx.reply("Раунд не розпочато - Недостатньо учасників :(")
-					game_status = false
+				if (participants.length % 2 == 0) {
+					ctx.reply("Реєстрація завершена! Генеруємо пари...")
+					console.log(participants.length)
 					reg_status = false
-					participants = []
-					pairs_done = []
+					generate_pairs(participants)
+
+				} else {
+					if (participants.length >= 3) {
+						ctx.reply("Реєстрація завершується... останній слот!")
+						extend_reg = true
+					} else {
+						ctx.reply("Раунд не розпочато - Недостатньо учасників :(")
+						game_status = false
+						reg_status = false
+						participants = []
+						old_pairs = {}
+					}
 				}
-			}
-		}, 25000)
-	} else {
-		ctx.reply("Упс... Лише адмін групи може стартувати раунд!")
-	}
+			}, 25000)
+		} else {
+			ctx.reply("Упс... Лише адмін групи може стартувати раунд!")
+		}
+	})
+	
 })
 
 bot.command('stop_dating', (ctx) => {
-	ctx.reply("Раунд speed-dating'у завершений!")
-	console.log('PAIRS')
-	console.log(pairs_done)
-	game_status = false
-	reg_status = false
-	participants = []
-	pairs_done = []
+	check_chat_admin(ctx.from.id, ctx.chat.id)
+	.then(res => {
+		if (res) {
+			ctx.reply("Раунд speed-dating'у завершений!")
+			console.log('PAIRS')
+			console.log(old_pairs)
+			game_status = false
+			reg_status = false
+			participants = []
+			old_pairs = {}
+		}
+		else{
+			ctx.reply("Упс... Лише адмін групи може зупиняти раунд!")
+		}
+	})
 })
 
 bot.command('go', (ctx) => {
