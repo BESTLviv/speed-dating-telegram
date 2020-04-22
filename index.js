@@ -101,7 +101,7 @@ function send_jitsi_room (user1='', user2='') {
 // generate_pairs([48370547, 48370546, 365306009, 48370544])
 // Bot commands
 bot.command('start', (ctx) => {
-	ctx.reply("Привіт! Я - бот для Speed Dating'у.\nТи активував(-ла) мене, тож тепер можеш брати участь у раундах")
+    ctx.reply("Привіт! Я - бот для Speed Dating'у.\nТи активував(-ла) мене, тож тепер можеш брати участь у раундах")
 })
 
 bot.command('speed_dating', (ctx) => {
@@ -114,11 +114,11 @@ bot.command('speed_dating', (ctx) => {
 			reg_status = true
 			setTimeout(() => {
 
-				if (participants.length % 2 == 0) {
-					ctx.reply("Реєстрація завершена! Генеруємо пари...")
-					console.log(participants.length)
-					reg_status = false
-					generate_pairs(participants)
+			if (participants.length % 2 == 0) {
+				ctx.reply("Реєстрація завершена! Генеруємо пари...")
+				console.log(participants.length)
+				reg_status = false
+				generate_pairs(ctx, participants)
 
 				} else {
 					if (participants.length >= 3) {
@@ -137,7 +137,7 @@ bot.command('speed_dating', (ctx) => {
 			ctx.reply("Упс... Лише адмін групи може стартувати раунд!")
 		}
 	})
-	
+
 })
 
 bot.command('stop_dating', (ctx) => {
