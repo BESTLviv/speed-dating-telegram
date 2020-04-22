@@ -12,13 +12,20 @@ var game_status = false
 var reg_status = false
 var extend_reg = false
 var participants = []
+var pairs_done = []
 let old_pairs = {}
 // Functions
 function check_chat_admin(userid, chatid) {
-	return telegram.getChatAdministrators(chatid)
+	telegram.getChatAdministrators(chatid)
 	.then((admin_arr) => {
-		console.log(admin_arr.some(admin => parseInt(admin.user.id) === parseInt(userid)))
-		return admin_arr.some(admin => parseInt(admin.user.id) === parseInt(userid))
+		console.log(admin_arr.length)
+		admin_arr.forEach(admin => {
+			console.log('checking')
+			console.log(admin)
+			if (parseInt(admin.user.id) = parseInt(userid)) {
+				return true
+			}
+		})
 	} )
 	.catch ( ()=>{
 		return false
@@ -90,15 +97,12 @@ function send_jitsi_room (user1='', user2='') {
 // generate_pairs([48370547, 48370546, 365306009, 48370544])
 // Bot commands
 bot.command('start', (ctx) => {
-	check_chat_admin(ctx.from.id, ctx.chat.id)
-	.then(res => { if(res) {
+	if (check_chat_admin(ctx.from.id, ctx.chat.id)) {
 		ctx.reply("Привіт! Я - бот для Speed Dating'у.\nТи активував(-ла) мене, тож тепер можеш брати участь у раундах")
-	} 
-	else {
-	ctx.reply('not passed')
 	}
-	})
-		
+	else {
+		ctx.reply('not passed')
+	}
 })
 
 bot.command('speed_dating', (ctx) => {
@@ -124,7 +128,7 @@ bot.command('speed_dating', (ctx) => {
 					game_status = false
 					reg_status = false
 					participants = []
-					old_pairs = {}
+					pairs_done = []
 				}
 			}
 		}, 25000)
@@ -134,18 +138,13 @@ bot.command('speed_dating', (ctx) => {
 })
 
 bot.command('stop_dating', (ctx) => {
-	if (check_chat_admin(ctx.from.id, ctx.chat.id)) {
-		ctx.reply("Раунд speed-dating'у завершений!")
-		console.log('OLD PAIRS')
-		console.log(old_pairs)
-		game_status = false
-		reg_status = false
-		participants = []
-		old_pairs = {}
-	} else {
-		ctx.reply("Упс... Лише адмін групи може зупиняти раунд!")
-	}
-	
+	ctx.reply("Раунд speed-dating'у завершений!")
+	console.log('PAIRS')
+	console.log(pairs_done)
+	game_status = false
+	reg_status = false
+	participants = []
+	pairs_done = []
 })
 
 bot.command('go', (ctx) => {
