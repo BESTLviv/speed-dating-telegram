@@ -21,13 +21,13 @@ function checkAdmin() {
 }
 
 function generate_pairs(members = []) {
-    if(members%2===0){
+    if(members%2!==0){
         return
     }
     const sortedMembers = members.sort(
         (a, b) => {
-            let a1 = old_pairs[a]?.filter(value => members.includes(value)).length || 0
-            let b1 = old_pairs[b]?.filter(value => members.includes(value)).length || 0
+            let a1 = old_pairs[a] && old_pairs[a].filter(value => members.includes(value)).length || 0
+            let b1 = old_pairs[b] && old_pairs[b].filter(value => members.includes(value)).length || 0
             return a1 - b1
         })
 
