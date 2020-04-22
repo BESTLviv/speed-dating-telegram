@@ -15,18 +15,9 @@ var participants = []
 let old_pairs = {}
 // Functions
 function check_chat_admin(userid, chatid) {
-	telegram.getChatAdministrators(chatid)
-	.then((admin_arr) => {
-		console.log(admin_arr.length)
-		admin_arr.forEach(admin => {
-			console.log('checking')
-			console.log(admin)
-			if (parseInt(admin.user.id) = parseInt(userid)) {
-				return true
-			}
-		})
-	} )
-	.catch ( ()=>{
+	return telegram.getChatAdministrators(chatid)
+	.then((admin_arr) => admin_arr.some(admin => parseInt(admin.user.id) === parseInt(userid)))
+	.catch(()=> {
 		return false
 	})
 	
