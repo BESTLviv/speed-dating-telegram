@@ -7,7 +7,8 @@ Work flow:
 
 2) A Speed Dating round starts with a command /speed_dating
 
-3) Users have 120 seconds to reserve a place to participate in a Speed dating Round
+3) Users have 120 seconds to reserve a place to participate in a Speed dating Round.
+To register - users must have started the bot in private messages and should write /go on the group chat when there is a registration for a Speed Dating round
 
 4) Each random pair from Round participants get a message from bot, with a link to a randomly generated meet.jit.si room
 
