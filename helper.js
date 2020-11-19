@@ -1,15 +1,17 @@
 const config = require('./config.json')
 const Telegram = require('telegraf/telegram')
 const telegram = new Telegram(config.bot_token)
-
-const ROUND_DURATION = 60 * 10 * 1000
-const jitsiUrl = 'https://meet.jit.si/'
-
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
 const adapter = new FileSync('db.json')
 const db = low(adapter)
 db.defaults({ old_pairs: {} }).write()
+
+const ROUND_DURATION = config.round_duration
+const jitsiUrl = 'https://meet.jit.si/'
+
+// Process Variables
+let timers = []
 
 function generatePairs(members = []) {
     const pairs = []
@@ -82,13 +84,11 @@ function sendJitsiRoom(user1 = '', user2 = '') {
     const personalRoomUrl = jitsiUrl + user1 + user2
     const message = 'Твоє персональне посилання на мітинг ' + personalRoomUrl
     Promise.all([telegram.sendMessage(user1, message), telegram.sendMessage(user2, message)])
-        .then((res) => {
-            setTimeout(() => {
-                Promise.all([
-                    telegram.sendMessage(user1, 'Раунд завершився! Повертайся у конфу :)'),
-                    telegram.sendMessage(user2, 'Раунд завершився! Повертайся у конфу :)'),
-                ]).catch(console.log)
+        .then(() => {
+            const timeoutId = setTimeout(() => {
+                finishRound(user1, user2, timeoutId)
             }, ROUND_DURATION)
+            timers.push({ user1, user2, timeoutId })
         })
         .catch(console.log)
 }
@@ -106,4 +106,26 @@ function resetPairs() {
     db.set('old_pairs', {}).write()
 }
 
-module.exports = { checkChatAdmin, generatePairs, sendJitsiRoom, resetPairs }
+async function interruptRegistration(ctx) {
+    await Promise.all(timers.map((el) => finishRound(el.user1, el.user2, el.timeoutId, true)))
+    timers = []
+    ctx.reply('Раунд було достроково завершено')
+}
+
+async function finishRound(user1, user2, timeoutId, isInterrupted) {
+    const index = timers.findIndex((el) => el.timeoutId === timeoutId)
+    if (index !== -1 && !isInterrupted) {
+        timers.splice(index, 1)
+    }
+
+    return Promise.all([
+        telegram.sendMessage(user1, 'Раунд завершився! Повертайся у конфу :)'),
+        telegram.sendMessage(user2, 'Раунд завершився! Повертайся у конфу :)'),
+    ]).catch(console.log)
+}
+
+function getTimers() {
+    return timers
+}
+
+module.exports = { checkChatAdmin, generatePairs, sendJitsiRoom, resetPairs, interruptRegistration, getTimers }
