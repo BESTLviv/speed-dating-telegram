@@ -18,7 +18,6 @@
     "dev": "nodemon index.js --ignore db.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "type": "module",
   "eslintConfig": {
     "extends": [
       "react-app",
